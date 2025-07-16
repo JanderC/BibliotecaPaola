@@ -65,6 +65,38 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
+  // FUNCIÓN REGISTER QUE FALTABA
+  const register = async (userData) => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:3001/api'}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(userData)
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        const { token, user: userInfo } = data
+        
+        // Guardar token y datos del usuario
+        localStorage.setItem('token', token)
+        localStorage.setItem('user', JSON.stringify(userInfo))
+        
+        setUser(userInfo)
+        
+        return { success: true, user: userInfo }
+      } else {
+        return { success: false, error: data.error || 'Error en el registro' }
+      }
+    } catch (error) {
+      console.error('Error en register:', error)
+      return { success: false, error: 'Error de conexión' }
+    }
+  }
+
   const logout = () => {
     localStorage.removeItem('token')
     localStorage.removeItem('user')
@@ -82,6 +114,7 @@ export const AuthProvider = ({ children }) => {
   const value = {
     user,
     login,
+    register, // AGREGAR REGISTER AL VALUE
     logout,
     isAdmin,
     isAuthenticated,
